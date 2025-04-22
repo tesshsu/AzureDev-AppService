@@ -15,3 +15,17 @@
  $ mkdir -p public src .github/workflows
  - The `public/` directory contains static files like `index.html`.
  - Later, `src/` will hold the Express.js API code, and `server.js` will serve both the API and static files.
+
+### Create a new App Service plain
+- $ az appservice plan create \
+  --name ASP-Aili-DevAppService \
+  --resource-group Aili \
+  --location westeurope \
+  --sku F1
+
+- $ az webapp create \
+  --name AiliDevAppService \
+  --resource-group Aili \
+  --plan ASP-Aili-DevAppService \
+  --runtime "NODE|14-lts"
+
