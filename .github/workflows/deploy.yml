@@ -1,19 +1,19 @@
 name: Deploy to Azure App Service
 
-     on:
-       push:
-         branches:
-           - main
+on:
+  push:
+    branches:
+      - main
 
-     jobs:
-       build-and-deploy:
-         runs-on: ubuntu-latest
-         steps:
-           - name: Checkout code
-             uses: actions/checkout@v3
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-           - name: Deploy to Azure Web App
-             uses: azure/webapps-deploy@v2
-             with:
-               app-name: AiliDevAppService  # Matches the new Web App name
-               publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: AiliDevAppService
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
