@@ -16,7 +16,7 @@
  - The `public/` directory contains static files like `index.html`.
  - Later, `src/` will hold the Express.js API code, and `server.js` will serve both the API and static files.
 
-### Create a new App Service plain
+### Create a new App Service plain and check log
 - $ az appservice plan create \
   --name ASP-Aili-DevAppService \
   --resource-group Aili \
@@ -28,4 +28,6 @@
   --resource-group Aili \
   --plan ASP-Aili-DevAppService \
   --runtime "NODE|14-lts"
+
+- $ az webapp log tail --name AiliDevAppService --resource-group Aili
 
