@@ -3,12 +3,14 @@
  ## Project Structure
  ```
  AzureDev-AppService/
- ├── public/             # Static files (e.g., index.html)
+ ├── public/index.html            # Static files (e.g., index.html)
  ├── src/                # Source code for Node.js/Express API (to be added later)
  ├── .github/            # GitHub Actions workflows
  │   └── workflows/
  ├── README.md
- └── (other files to be added: package.json, server.js, etc.)
+ ├── package-lock.json
+ ├── package.json
+ └── server.js
  ```
 
  ## Initial Setup
@@ -27,7 +29,13 @@
   --name AiliDevAppService \
   --resource-group Aili \
   --plan ASP-Aili-DevAppService \
-  --runtime "NODE|14-lts"
+  --runtime "NODE|16-lts"
+
+-$ cd path/to/AzureDev-AppService
+-$ az webapp up --name AiliDevAppService --resource-group Aili --runtime "NODE|16-lts"
+
 
 - $ az webapp log tail --name AiliDevAppService --resource-group Aili
+
+- $ az webapp restart --name AiliDevAppService --resource-group Aili
 
