@@ -15,27 +15,63 @@
 
  ## Initial Setup
  $ mkdir -p public src .github/workflows
- - The `public/` directory contains static files like `index.html`.
- - Later, `src/` will hold the Express.js API code, and `server.js` will serve both the API and static files.
+ - public/ — holds static files like index.html.
 
-### Create a new App Service plain and check log
+ - src/ — will later hold your Express.js API logic.
+
+ - server.js — serves the frontend and (soon) backend content.
+
+ - package.json — defines project and dependencies.
+
+### 🌐 Deploy to Azure App Service (via CLI)
+🔧 1. Create Resource Group (if not already created)
+
+- $ az group create \
+  --name Aili \
+  --location westeurope
+
+⚙️ 2. Create App Service Plan
+
 - $ az appservice plan create \
   --name ASP-Aili-DevAppService \
   --resource-group Aili \
   --location westeurope \
-  --sku F1
+  --sku F1  # Free tier for testing
 
+🌍 3. Create Web App
 - $ az webapp create \
   --name AiliDevAppService \
   --resource-group Aili \
   --plan ASP-Aili-DevAppService \
   --runtime "NODE|16-lts"
 
+🚀 4. Deploy From Local Machine (Optional)
 -$ cd path/to/AzureDev-AppService
 -$ az webapp up --name AiliDevAppService --resource-group Aili --runtime "NODE|16-lts"
 
 
-- $ az webapp log tail --name AiliDevAppService --resource-group Aili
+###  🔁 GitHub Actions CI/CD
+Whenever you push to main, GitHub Actions automatically:
 
-- $ az webapp restart --name AiliDevAppService --resource-group Aili
+Installs dependencies (npm install)
+
+Zips your project (including server.js, public/, etc.)
+
+Deploys to Azure Web App
+
+###  ✅ Prerequisites
+Set these secrets in your GitHub repo:
+
+AZURE_CREDENTIALS – from a service principal
+
+AZURE_WEBAPP_PUBLISH_PROFILE – from Azure Portal > App Service > "Get Publish Profile"
+
+
+###  🛠️ Useful Azure Commands
+
+Description	Command
+
+Tail logs	$ az webapp log tail --name AiliDevAppService --resource-group Aili
+Restart app	$ az webapp restart --name AiliDevAppService --resource-group Aili
+View app	https://ailidevappservice.azurewebsites.net
 
