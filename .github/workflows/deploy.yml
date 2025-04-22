@@ -17,7 +17,10 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
+      
+      - name: 📦 Install dependencies
+        run: npm install
+        
       - name: 🧳 Zip app content
         run: |
           zip -r app.zip * .[^.]*
