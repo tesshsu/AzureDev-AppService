@@ -1,4 +1,8 @@
- This repository is for practicing deployment to Azure K8 Service.
+ # 🚀 AzureDev-AppService
+
+This repository is for **practicing deployment to Azure Kubernetes Service (AKS)** and Azure App Service using GitHub Actions CI/CD.  
+It supports both traditional web app deployment (App Service) and containerized Kubernetes deployment (AKS + Helm).
+
 
  ## Project Structure
  ```
@@ -18,29 +22,93 @@
  └── server.js
  ```
 
- ## Setting workflow
+---
 
 ## 🛠 Environments
 
 | Branch | Deployment Target | Description |
 |--------|-------------------|-------------|
-| `main` | Azure Web App     | Traditional PaaS (static + server) |
-| `dev`  | Azure Kubernetes Service (AKS) | Containerized microservice with Helm |
+| `main` | Azure App Service | Traditional PaaS for simple Node.js apps |
+| `dev`  | Azure Kubernetes Service (AKS) | Containerized app deployed via Helm |
 
-Push to `main` 👉 deploys to App Service  
-Push to `dev` 👉 builds Docker image → pushes to ACR → deploys to AKS via Helm
+✔️ Push to `main` → Deploys ZIP to Azure Web App  
+✔️ Push to `dev` → Builds Docker image → Pushes to ACR → Deploys to AKS via Helm
 
+---
 
-### 🌐 Deploy to Azure App Service (via CLI)
-🔧 1. Create Resource Group (if not already created)
+## 🧰 Setup Instructions
 
+### 🔧 1. Create Azure Resource Group
 
-###  🔁 GitHub Actions CI/CD
-Whenever you push to main, GitHub Actions automatically:
+```bash
+az group create --name Aili --location westeurope
+```
 
-Installs dependencies (npm install)
+###  📦 2. Create Azure Container Registry (ACR)
+```bash
+az acr create \
+  --name ailidevacr \
+  --resource-group Aili \
+  --sku Basic \
+  --location westeurope \
+  --admin-enabled true
+```
 
-Zips your project (including server.js, public/, etc.)
+### ☸️ 3. Create Azure Kubernetes Cluster (AKS)
+```bash
+az aks create \
+  --resource-group Aili \
+  --name AiliDevAKS \
+  --node-count 1 \
+  --node-vm-size Standard_B2s \
+  --generate-ssh-keys \
+  --enable-managed-identity \
+  --attach-acr ailidevacr \
+  --location westeurope
+```
 
-Deploys to Azure Kubernete
+### 🔐 4. Set GitHub Secrets 
+```bash
+az acr credential show --name ailidevacr
+```
+- ACR_USERNAME
+- ACR_PASSWORD
+
+### ⚙️ GitHub Actions CI/CD
+
+📂 Path: .github/workflows/deploy.yml
+✅ main branch
+Installs dependencies
+
+Zips source code
+
+Deploys ZIP to Azure Web App
+
+✅ dev branch
+Sets NODE_ENV=development
+
+Builds Docker image using Dockerfile
+
+Pushes to ACR (ailidevacr.azurecr.io)
+
+Deploys to AKS using helm upgrade --install with values from helm/myapp/
+
+### 📦 Helm Deployment ( optional run in local to see if helm working )
+Helm charts are located in helm/myapp/. When deployed via GitHub Actions or manually:
+
+```bash
+helm upgrade --install myapp ./helm/myapp \
+  --set image.repository=ailidevacr.azurecr.io/myapp \
+  --set image.tag=<your-image-tag>
+```
+
+### 🔍 Validate Deployment
+
+```bash
+az aks get-credentials --resource-group Aili --name AiliDevAKS
+
+kubectl get pods
+kubectl get svc
+```
+
 
