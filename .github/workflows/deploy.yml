@@ -29,7 +29,7 @@ jobs:
       
       - name: Docker Login to ACR
         if: github.ref == 'refs/heads/dev'
-        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login youracr.azurecr.io -u ${{ secrets.ACR_USERNAME }} --password-stdin
+        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login ailidevacr.azurecr.io -u ${{ secrets.ACR_USERNAME }} --password-stdin
       
       - name: Build and push Docker image (AKS)
         if: github.ref == 'refs/heads/dev'
@@ -43,10 +43,10 @@ jobs:
       - name: Deploy to AKS by helm
         if: github.ref == 'refs/heads/dev'
         run: |
-          az aks get-credentials --resource-group yourResourceGroup --name yourAKSCluster
+          az aks get-credentials --resource-group Aili --name AiliDevAKS
           helm upgrade --install myapp ./helm/myapp \
             --set image.tag=${{ github.sha }} \
-            --set image.repository=youracr.azurecr.io/myapp
+            --set image.repository=ailidevacr.azurecr.io/myapp
 
       - name: Set NODE_ENV (Web App)
         if: github.ref == 'refs/heads/main'
