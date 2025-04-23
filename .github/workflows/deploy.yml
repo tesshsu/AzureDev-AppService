@@ -1,33 +1,67 @@
-name: Deploy to Azure App Service
+name: Build and Deploy
 
 on:
   push:
     branches:
-      - main
+      - main # Web App
+      - dev # AKS
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }} # Use branch name as environment
 
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: 🔐 Azure Login
+      - name: Azure Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      
-      - name: 📦 Install dependencies
-        run: npm install
-        
-      - name: 🧳 Zip app content
-        run: |
-          zip -r app.zip * .[^.]*
 
-      - name: 🚀 Deploy to Azure Web App
+      - name: Install dependencies
+        run: npm install
+
+      - name: Set NODE_ENV (AKS)
+        if: github.ref == 'refs/heads/dev'
+        run: echo "NODE_ENV=development" >> $GITHUB_ENV
+      
+      - name: Docker Login to ACR
+        if: github.ref == 'refs/heads/dev'
+        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login youracr.azurecr.io -u ${{ secrets.ACR_USERNAME }} --password-stdin
+      
+      - name: Build and push Docker image (AKS)
+        if: github.ref == 'refs/heads/dev'
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ailidevacr.azurecr.io/myapp:${{ github.sha }}
+          build-args: NODE_ENV=development
+
+      - name: Deploy to AKS by helm
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          az aks get-credentials --resource-group yourResourceGroup --name yourAKSCluster
+          helm upgrade --install myapp ./helm/myapp \
+            --set image.tag=${{ github.sha }} \
+            --set image.repository=youracr.azurecr.io/myapp
+
+      - name: Set NODE_ENV (Web App)
+        if: github.ref == 'refs/heads/main'
+        run: echo "NODE_ENV=production" >> $GITHUB_ENV
+
+      - name: Zip app content (Web App)
+        if: github.ref == 'refs/heads/main'
+        run: zip -r app.zip * .[^.]*
+
+      - name: Deploy to Azure Web App (Web App)
+        if: github.ref == 'refs/heads/main'
         uses: azure/webapps-deploy@v2
         with:
           app-name: AiliDevAppService
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: app.zip
+        env:
+          NODE_ENV: production
