@@ -1,10 +1,60 @@
 <!DOCTYPE html>
-     <html>
-     <head>
-         <title>Simple Azure App</title>
-     </head>
-     <body>
-         <h1>Hello from Azure App Service deploy sample! 🚀</h1>
-         <p>This is a simple static page. An Express.js API will be added later.</p>
-     </body>
-     </html>
+<html>
+<head>
+    <title>Simple Azure App</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hello from Azure App Service deploy sample! 🚀</h1>
+    <p>This is a simple static page. An Express.js API will be added later.</p>
+
+    <h2>Top 20 U.S. Stocks</h2>
+    <table id="stockTable">
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Name</th>
+                <th>Price (USD)</th>
+            </tr>
+        </thead>
+        <tbody id="stockList"></tbody>
+    </table>
+
+    <script>
+        // Fetch stock data from the API and display it
+        fetch('/api/stocks')
+            .then(response => response.json())
+            .then(data => {
+                const stockList = document.getElementById('stockList');
+                data.forEach(stock => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${stock.symbol}</td>
+                        <td>${stock.name}</td>
+                        <td>${stock.price}</td>
+                    `;
+                    stockList.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching stock data:', error);
+                const stockList = document.getElementById('stockList');
+                stockList.innerHTML = '<tr><td colspan="3">Failed to load stock data.</td></tr>';
+            });
+    </script>
+</body>
+</html>
