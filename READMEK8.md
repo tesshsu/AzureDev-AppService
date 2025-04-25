@@ -102,13 +102,56 @@ helm upgrade --install myapp ./helm/myapp \
   --set image.tag=<your-image-tag>
 ```
 
-### 🔍 Validate Deployment
+### 🔍 Validate Deployment once updated code by AZ cli
+
+Test first in local
 
 ```bash
-az aks get-credentials --resource-group Aili --name AiliDevAKS
+# Build the Docker image
+docker build -t azuredev-appservice:latest .
 
-kubectl get pods
-kubectl get svc
+# Run locally to test (if no other container running on 8080)
+docker run -p 8080:8080 azuredev-appservice:latest
+
+# Test in browser or curl
+curl http://localhost:8080
+
 ```
 
+Login to Azure & Get AKS Credentials
+
+```bash
+az login
+az aks get-credentials --resource-group Aili --name AiliDevAKS
+
+```
+
+Push Updated Docker Image to ACR
+
+```bash
+# Tag with ACR repo name
+docker tag azuredev-appservice:latest ailidevacr.azurecr.io/azuredev-appservice:latest
+
+# Push to ACR
+docker push ailidevacr.azurecr.io/azuredev-appservice:latest
+```
+
+Deploy to AKS via Helm
+
+```bash
+helm upgrade --install azuredev-appservice ./helm/myapp -n dev
+```
+
+Check Logs / Test Live Endpoint
+```bash
+# Replace with actual pod name if needed
+kubectl logs -f <pod-name> -n dev
+
+# Or quick lookup:
+kubectl logs -l app=azuredev-appservice -n dev
+
+# Open service EXTERNAL-IP in browser
+http://<EXTERNAL-IP>/
+
+```
 
