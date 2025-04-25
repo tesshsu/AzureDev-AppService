@@ -1,3 +1,7 @@
+// server.js
+require('dotenv').config({
+  path: `.env.${process.env.NODE_ENV || 'production'}`,
+});
 const express = require('express');
 const path = require('path');
 const yahooFinance = require('yahoo-finance2').default;

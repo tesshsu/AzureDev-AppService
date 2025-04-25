@@ -1,0 +1,10 @@
+replicaCount: 1
+
+image:
+  repository: ailidevacr.azurecr.io/myapp
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: LoadBalancer
+  port: 80

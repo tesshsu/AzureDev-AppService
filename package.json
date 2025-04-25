@@ -20,6 +20,7 @@
   "homepage": "https://github.com/tesshsu/AzureDev-AppService#readme",
   "dependencies": {
     "express": "^4.21.2",
-    "yahoo-finance2": "^2.13.3"
+    "yahoo-finance2": "^2.13.3",
+    "dotenv": "^16.5.0"
   }
 }
