@@ -20,41 +20,47 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      # Install dependencies for both Web App and AKS
       - name: Install dependencies
         run: npm install
 
+      # AKS Deployment (dev branch)
       - name: Set NODE_ENV (AKS)
         if: github.ref == 'refs/heads/dev'
         run: echo "NODE_ENV=development" >> $GITHUB_ENV
-      
-      - name: Docker Login to ACR
+
+      - name: Docker Login to ACR (AKS)
         if: github.ref == 'refs/heads/dev'
-        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login ailidevacr.azurecr.io -u ${{ secrets.ACR_USERNAME }} --password-stdin
-      
+        run: |
+          az acr login --name ailidevacr
+
       - name: Build and push Docker image (AKS)
         if: github.ref == 'refs/heads/dev'
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: ailidevacr.azurecr.io/myapp:${{ github.sha }}
           build-args: NODE_ENV=development
 
-      - name: Deploy to AKS by helm
+      - name: Deploy to AKS by Helm
         if: github.ref == 'refs/heads/dev'
         run: |
-          az aks get-credentials --resource-group Aili --name AiliDevAKS
+          az aks get-credentials --resource-group Aili --name AiliDevAKS --admin
           helm upgrade --install myapp ./helm/myapp \
             --set image.tag=${{ github.sha }} \
             --set image.repository=ailidevacr.azurecr.io/myapp
 
+      # Web App Deployment (main branch)
       - name: Set NODE_ENV (Web App)
         if: github.ref == 'refs/heads/main'
         run: echo "NODE_ENV=production" >> $GITHUB_ENV
 
-      - name: Zip app content (Web App)
+      - name: Zip app content with node_modules (Web App)
         if: github.ref == 'refs/heads/main'
-        run: zip -r app.zip * .[^.]*
+        run: |
+          npm install # Ensure node_modules is present
+          zip -r app.zip * .[^.]* -x "*.git*"
 
       - name: Deploy to Azure Web App (Web App)
         if: github.ref == 'refs/heads/main'
