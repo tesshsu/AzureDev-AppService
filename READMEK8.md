@@ -12,13 +12,16 @@ It supports both traditional web app deployment (App Service) and containerized 
  ├── helm/                 # Helm charts directory
  │   ├── Chart.yaml
  │   ├── values.yaml
- │   └── templates/       # Kubernetes manifests
+ │   └── templates/  
+ │   │   └── deployment.yaml 
+ │   │   └── service.yaml   # Kubernetes manifests
  ├── .github/            # GitHub Actions workflows
  │   └── workflows/
  ├── README.md
  ├── package-lock.json
  ├── package.json
  ├── Dockerfile           # Containerization
+ ├── Jenkinsfile
  └── server.js
  ```
 

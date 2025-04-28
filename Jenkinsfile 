@@ -1,0 +1,73 @@
+pipeline {
+    agent any
+
+    environment {
+        ACR_NAME = 'ailidevacr.azurecr.io'
+        IMAGE_NAME = 'azuredev-appservice'
+        IMAGE_TAG = 'latest'
+        ACR_LOGIN = credentials('acr-service-principal')  // Jenkins Credentials: ID = acr-service-principal
+        AZ_SUBSCRIPTION = 'your-subscription-id'
+        RESOURCE_GROUP = 'Aili'
+        AKS_NAME = 'AiliDevAKS'
+        K8S_NAMESPACE = 'dev'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/tesshsu/AzureDev-AppService.git', branch: 'dev'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'npm test'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t ailidevacr.azurecr.io/myapp:${BUILD_NUMBER} .'
+            }
+        }
+        stage('Push to ACR') {
+            steps {
+                withCredentials([azureServicePrincipal('azure-credentials')]) {
+                    sh '''
+                        az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+                        az acr login --name ailidevacr
+                        docker push ailidevacr.azurecr.io/myapp:${BUILD_NUMBER}
+                    '''
+                }
+            }
+        }
+        stage('Deploy to AKS') {
+            steps {
+                withCredentials([azureServicePrincipal('azure-credentials')]) {
+                    sh '''
+                        az aks get-credentials --resource-group Aili --name AiliDevAKS
+                        helm upgrade --install myapp ./helm/myapp \
+                          --set image.tag=${BUILD_NUMBER} \
+                          --set image.repository=ailidevacr.azurecr.io/myapp
+                    '''
+                }
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Pipeline finished!'
+        }
+        success {
+            echo 'Deployment succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
