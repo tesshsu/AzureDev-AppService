@@ -158,3 +158,29 @@ http://<EXTERNAL-IP>/
 
 ```
 
+### Bonus : using GitOpt ArgoCD
+
+```bash
+# Connect to your AKS cluster
+az aks get-credentials --resource-group Aili --name AiliDevAKS --admin
+
+# Install ArgoCD
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# Verify ArgoCD is running
+kubectl get pods -n argocd
+```
+
+- Once ArgoCD is installed on AKS cluster, deploy.yml could proceed by appliying argocd/app-of-apps.yaml by commit push to dev
+- Go to dashboard ArgoCD 
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8081:443
+```
+- Go to http://localhost:8081
+
+- Find your login pwd by follow: user admin
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```

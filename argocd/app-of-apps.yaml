@@ -29,7 +29,7 @@ spec:
     namespace: dev
   project: default
   source:
-    repoURL: https://github.com/${{ github.repository }}.git  # This will be replaced dynamically
+    repoURL: https://github.com/tesshsu/AzureDev-AppService.git  # This will be replaced dynamically
     targetRevision: dev
     path: helm/myapp
     helm:
