@@ -1,10 +1,10 @@
-name: Build and Deploy to Azure Web App
+name: Build and Deploy to Azure
 
 on:
   push:
     branches:
       - main # Web App
-      - dev # AKS
+      - dev  # AKS with ArgoCD
 
 jobs:
   build-and-deploy:
@@ -32,7 +32,7 @@ jobs:
       - name: Docker Login to ACR (AKS)
         if: github.ref == 'refs/heads/dev'
         run: |
-          az acr login --name ailidevacr
+          echo ${{ secrets.ACR_PASSWORD }} | docker login ailidevacr.azurecr.io --username ${{ secrets.ACR_USERNAME }} --password-stdin
 
       - name: Build and push Docker image (AKS)
         if: github.ref == 'refs/heads/dev'
@@ -40,17 +40,37 @@ jobs:
         with:
           context: .
           push: true
-          tags: ailidevacr.azurecr.io/myapp:${{ github.sha }}
+          tags: ailidevacr.azurecr.io/azuredev-appservice:${{ github.sha }}
           build-args: NODE_ENV=development
 
-      - name: Deploy to AKS by Helm
+      - name: Install kubectl
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+      - name: Connect to AKS
         if: github.ref == 'refs/heads/dev'
         run: |
           az aks get-credentials --resource-group Aili --name AiliDevAKS --admin
-          helm upgrade --install myapp ./helm/myapp \
-            --set image.tag=${{ github.sha }} \
-            --set image.repository=ailidevacr.azurecr.io/myapp
 
+      - name: Sync ArgoCD Application (AKS)
+        if: github.ref == 'refs/heads/dev'
+        run: |
+            # Update the image.tag in app-of-apps.yaml
+            sed -i "s/tag: \".*\"/tag: \"${{ github.sha }}\"/g" argocd/app-of-apps.yaml
+            sed -i "s|repoURL: https://github.com/\${{ github.repository }}.git|repoURL: https://github.com/${{ github.repository }}.git|g" argocd/app-of-apps.yaml
+        
+            # Commit and push the updated app-of-apps.yaml back to the repository
+            git config --global user.email "github-actions@github.com"
+            git config --global user.name "GitHub Actions"
+            git add argocd/app-of-apps.yaml
+            git commit -m "Update image tag to ${{ github.sha }} for ArgoCD deployment"
+            git push
+        
+            # Apply the app-of-apps.yaml to bootstrap the application
+            kubectl apply -f argocd/app-of-apps.yaml
       # Web App Deployment (main branch)
       - name: Set NODE_ENV (Web App)
         if: github.ref == 'refs/heads/main'

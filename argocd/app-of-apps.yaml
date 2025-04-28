@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-app
+  namespace: argocd
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  project: default
+  source:
+    repoURL: https://github.com/${{ github.repository }}.git  # This will be replaced dynamically
+    targetRevision: HEAD
+    path: argocd
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: azuredev-appservice
+  namespace: argocd
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+  project: default
+  source:
+    repoURL: https://github.com/${{ github.repository }}.git  # This will be replaced dynamically
+    targetRevision: dev
+    path: helm/myapp
+    helm:
+      values: |
+        image:
+          tag: "latest"  # This will be updated dynamically
+          repository: "ailidevacr.azurecr.io/azuredev-appservice"
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
