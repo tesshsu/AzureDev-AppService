@@ -1,3 +1,42 @@
+# Node.js
 node_modules/
-app.zip
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# OS/IDE
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Build/deploy
+app.zip
+dist/
+build/
+coverage/
+
+# Docker
+*.local
+docker-compose.override.yml
+
+# Helm/Kubernetes
+*.tgz
+*.bak
+*.tmp
+helm-release.yaml
+secrets.yaml
+sealed-secret.yaml
+
+# Logs
+logs/
+*.log
+
+# Misc
+*.pid

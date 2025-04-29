@@ -44,35 +44,35 @@ It supports both traditional web app deployment (App Service) and containerized 
 ### 🔧 1. Create Azure Resource Group
 
 ```bash
-az group create --name Aili --location westeurope
+az group create --name <Resource group Name> --location <Location>
 ```
 
 ###  📦 2. Create Azure Container Registry (ACR)
 ```bash
 az acr create \
-  --name ailidevacr \
-  --resource-group Aili \
+  --name <ACR name> \
+  --resource-group <Resource group Name> \
   --sku Basic \
-  --location westeurope \
+  --location <Location> \
   --admin-enabled true
 ```
 
 ### ☸️ 3. Create Azure Kubernetes Cluster (AKS)
 ```bash
 az aks create \
-  --resource-group Aili \
-  --name AiliDevAKS \
+  --resource-group <Resource group Name> \
+  --name <AKS Name> \
   --node-count 1 \
   --node-vm-size Standard_B2s \
   --generate-ssh-keys \
   --enable-managed-identity \
-  --attach-acr ailidevacr \
-  --location westeurope
+  --attach-acr <ACR name> \
+  --location <Location>
 ```
 
 ### 🔐 4. Set GitHub Secrets 
 ```bash
-az acr credential show --name ailidevacr
+az acr credential show --name <ACR name>
 ```
 - ACR_USERNAME
 - ACR_PASSWORD
@@ -92,7 +92,7 @@ Sets NODE_ENV=development
 
 Builds Docker image using Dockerfile
 
-Pushes to ACR (ailidevacr.azurecr.io)
+Pushes to ACR (<ACR name>.azurecr.io)
 
 Deploys to AKS using helm upgrade --install with values from helm/myapp/
 
@@ -101,7 +101,7 @@ Helm charts are located in helm/myapp/. When deployed via GitHub Actions or manu
 
 ```bash
 helm upgrade --install myapp ./helm/myapp \
-  --set image.repository=ailidevacr.azurecr.io/myapp \
+  --set image.repository=<ACR name>.azurecr.io/myapp \
   --set image.tag=<your-image-tag>
 ```
 
@@ -125,7 +125,7 @@ Login to Azure & Get AKS Credentials
 
 ```bash
 az login
-az aks get-credentials --resource-group Aili --name AiliDevAKS
+az aks get-credentials --resource-group <Resource group Name> --name <AKS Name>
 
 ```
 
@@ -133,10 +133,10 @@ Push Updated Docker Image to ACR
 
 ```bash
 # Tag with ACR repo name
-docker tag azuredev-appservice:latest ailidevacr.azurecr.io/azuredev-appservice:latest
+docker tag azuredev-appservice:latest <ACR name>.azurecr.io/azuredev-appservice:latest
 
 # Push to ACR
-docker push ailidevacr.azurecr.io/azuredev-appservice:latest
+docker push <ACR name>.azurecr.io/azuredev-appservice:latest
 ```
 
 Deploy to AKS via Helm
@@ -147,6 +147,8 @@ helm upgrade --install azuredev-appservice ./helm/myapp -n dev
 
 Check Logs / Test Live Endpoint
 ```bash
+# To get external ip
+kubectl get svc -n dev
 # Replace with actual pod name if needed
 kubectl logs -f <pod-name> -n dev
 
@@ -162,7 +164,7 @@ http://<EXTERNAL-IP>/
 
 ```bash
 # Connect to your AKS cluster
-az aks get-credentials --resource-group Aili --name AiliDevAKS --admin
+az aks get-credentials --resource-group <Resource group Name> --name <AKS Name> --admin
 
 # Install ArgoCD
 kubectl create namespace argocd
