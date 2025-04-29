@@ -27,27 +27,27 @@
 🔧 1. Create Resource Group (if not already created)
 
 - $ az group create \
-  --name Aili \
-  --location westeurope
+  --name <Resource group name> \
+  --location <location>
 
 ⚙️ 2. Create App Service Plan
 
 - $ az appservice plan create \
-  --name ASP-Aili-DevAppService \
-  --resource-group Aili \
-  --location westeurope \
+  --name ASP-<Resource group name>-DevAppService \
+  --resource-group <Resource group name> \
+  --location <location> \
   --sku F1  # Free tier for testing
 
 🌍 3. Create Web App
 - $ az webapp create \
-  --name AiliDevAppService \
-  --resource-group Aili \
-  --plan ASP-Aili-DevAppService \
+  --name <App service name> \
+  --resource-group <Resource group name> \
+  --plan ASP-<Resource group name>-DevAppService \
   --runtime "NODE|16-lts"
 
 🚀 4. Deploy From Local Machine (Optional)
 -$ cd path/to/AzureDev-AppService
--$ az webapp up --name AiliDevAppService --resource-group Aili --runtime "NODE|16-lts"
+-$ az webapp up --name <App service name> --resource-group <Resource group name> --runtime "NODE|16-lts"
 
 
 ###  🔁 GitHub Actions CI/CD
@@ -71,7 +71,7 @@ AZURE_WEBAPP_PUBLISH_PROFILE – from Azure Portal > App Service > "Get Publish 
 
 Description	Command
 
-Tail logs	$ az webapp log tail --name AiliDevAppService --resource-group Aili
-Restart app	$ az webapp restart --name AiliDevAppService --resource-group Aili
+Tail logs	$ az webapp log tail --name <App service name> --resource-group <Resource group name>
+Restart app	$ az webapp restart --name <App service name> --resource-group <Resource group name>
 View app	https://ailidevappservice.azurewebsites.net
 
