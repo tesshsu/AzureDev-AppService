@@ -1,0 +1,8 @@
+server:
+  service:
+    type: LoadBalancer
+    port: 9090
+  extraScrapeConfigs: |
+    - job_name: 'azuredev-appservice'
+      static_configs:
+        - targets: ['azuredev-appservice.dev.svc.cluster.local:3000']

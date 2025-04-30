@@ -1,0 +1,66 @@
+- name: Install Prometheus and Grafana on AKS
+  hosts: localhost
+  connection: local
+  vars:
+    helm_version: "3.14.4"
+    prometheus_namespace: monitoring
+    grafana_namespace: monitoring
+  tasks:
+    - name: Install Helm binary
+      ansible.builtin.get_url:
+        url: https://get.helm.sh/helm-v{{ helm_version }}-linux-amd64.tar.gz
+        dest: /tmp/helm.tar.gz
+      when: ansible_os_family == "Darwin"
+
+    - name: Extract Helm binary
+      ansible.builtin.unarchive:
+        src: /tmp/helm.tar.gz
+        dest: /tmp
+        remote_src: yes
+      when: ansible_os_family == "Darwin"
+
+    - name: Move Helm binary to /usr/local/bin
+      ansible.builtin.copy:
+        src: /tmp/linux-amd64/helm
+        dest: /usr/local/bin/helm
+        mode: '0755'
+      when: ansible_os_family == "Darwin"
+
+    - name: Create monitoring namespace
+      kubernetes.core.k8s:
+        api_version: v1
+        kind: Namespace
+        name: "{{ prometheus_namespace }}"
+        state: present
+
+    - name: Add Prometheus Helm repo
+      kubernetes.core.helm_repository:
+        name: prometheus-community
+        repo_url: https://prometheus-community.github.io/helm-charts
+
+    - name: Install Prometheus via Helm
+      kubernetes.core.helm:
+        name: prometheus
+        chart_ref: prometheus-community/prometheus
+        release_namespace: "{{ prometheus_namespace }}"
+        state: present
+        values: "{{ lookup('file', 'prometheus-values.yml') | from_yaml }}"
+      vars:
+        values_file: "{{ playbook_dir }}/prometheus-values.yml"
+
+    - name: Add Grafana Helm repo
+      kubernetes.core.helm_repository:
+        name: grafana
+        repo_url: https://grafana.github.io/helm-charts
+
+    - name: Install Grafana via Helm
+      kubernetes.core.helm:
+        name: grafana
+        chart_ref: grafana/grafana
+        release_namespace: "{{ grafana_namespace }}"
+        state: present
+        values:
+          service:
+            type: LoadBalancer
+            port: 3000
+          adminPassword: admin123
