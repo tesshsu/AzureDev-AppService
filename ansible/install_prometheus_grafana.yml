@@ -2,28 +2,13 @@
   hosts: localhost
   connection: local
   vars:
-    helm_version: "3.14.4"
     prometheus_namespace: monitoring
     grafana_namespace: monitoring
   tasks:
-    - name: Install Helm binary
-      ansible.builtin.get_url:
-        url: https://get.helm.sh/helm-v{{ helm_version }}-linux-amd64.tar.gz
-        dest: /tmp/helm.tar.gz
-      when: ansible_os_family == "Darwin"
-
-    - name: Extract Helm binary
-      ansible.builtin.unarchive:
-        src: /tmp/helm.tar.gz
-        dest: /tmp
-        remote_src: yes
-      when: ansible_os_family == "Darwin"
-
-    - name: Move Helm binary to /usr/local/bin
-      ansible.builtin.copy:
-        src: /tmp/linux-amd64/helm
-        dest: /usr/local/bin/helm
-        mode: '0755'
+    - name: Install Helm using Homebrew
+      community.general.homebrew:
+        name: helm
+        state: present
       when: ansible_os_family == "Darwin"
 
     - name: Create monitoring namespace
