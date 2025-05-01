@@ -59,25 +59,22 @@ jobs:
         run: |
           az aks get-credentials --resource-group Aili --name AiliDevAKS --admin
 
-          - name: Sync ArgoCD Application (AKS)
-          if: github.ref == 'refs/heads/dev'
-          run: |
-            echo "🔄 Updating ArgoCD app-of-apps.yaml with image tag: ${{ github.sha }}"
-        
-            # Update image tag in ArgoCD manifest
+      - name: Sync ArgoCD Application (AKS)
+        if: github.ref == 'refs/heads/dev'
+        run: |
+            # Update the image.tag in app-of-apps.yaml
             sed -i "s/tag: \".*\"/tag: \"${{ github.sha }}\"/g" argocd/app-of-apps.yaml
             sed -i "s|repoURL: https://github.com/\${{ github.repository }}.git|repoURL: https://github.com/${{ github.repository }}.git|g" argocd/app-of-apps.yaml
         
+            # Commit and push the updated app-of-apps.yaml back to the repository
             git config --global user.email "github-actions@github.com"
             git config --global user.name "GitHub Actions"
             git add argocd/app-of-apps.yaml
-            git commit -m "Update image tag to ${{ github.sha }} for ArgoCD deployment" || echo "ℹ️ No changes to commit."
+            git commit -m "Update image tag to ${{ github.sha }} for ArgoCD deployment"
+            git push
         
-            echo "📤 Attempting to push updated ArgoCD file..."
-            git push || echo "⚠️ Warning: Failed to push changes to GitHub. Proceeding anyway."
-        
-            echo "🚀 Applying ArgoCD configuration..."
-            kubectl apply -f argocd/app-of-apps.yaml        
+            # Apply the app-of-apps.yaml to bootstrap the application
+            kubectl apply -f argocd/app-of-apps.yaml
       # Web App Deployment (main branch)
       - name: Set NODE_ENV (Web App)
         if: github.ref == 'refs/heads/main'
