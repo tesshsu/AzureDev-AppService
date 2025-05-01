@@ -35,7 +35,7 @@ spec:
     helm:
       values: |
         image:
-          tag: "9d514cb028f8230f795d3ab903d4c28e2f03b817"  # This will be updated dynamically
+          tag: "26b9d44fe98272612acf0fbe230552c4f972a327"  # This will be updated dynamically
           repository: "ailidevacr.azurecr.io/azuredev-appservice"
   syncPolicy:
     automated:
