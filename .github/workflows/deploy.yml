@@ -6,6 +6,10 @@ on:
       - main # Web App
       - dev  # AKS with ArgoCD
 
+permissions:
+  contents: write
+  id-token: write 
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest

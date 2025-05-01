@@ -18,7 +18,9 @@ const httpRequestCounter = new client.Counter({
 
 // Middleware to count HTTP requests
 app.use((req, res, next) => {
+  console.log(`Request received: ${req.method} ${req.path}`);
   res.on('finish', () => {
+    console.log(`Request finished: ${req.method} ${req.path} ${res.statusCode}`);
     httpRequestCounter.inc({
       method: req.method,
       route: req.path,

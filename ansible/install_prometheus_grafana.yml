@@ -37,6 +37,7 @@
               targetPort: 9090
             extraScrapeConfigs: |
               - job_name: 'azuredev-appservice'
+                metrics_path: /metrics
                 static_configs:
                   - targets: ['azuredev-appservice.dev.svc.cluster.local:8080']
 
