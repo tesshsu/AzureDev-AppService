@@ -20,10 +20,18 @@ const httpRequestCounter = new client.Counter({
 // Middleware to count HTTP requests and send usage to Kafka
 const kafka = new Kafka({
   clientId: 'stock-api-producer',
-  brokers: ['50.85.95.49:9092'], // Replace with kafka LoadBalancer EXTERNAL-IP
+  brokers: ['9.163.161.131:9092'], // Replace with kafka LoadBalancer EXTERNAL-IP
 });
 const producer = kafka.producer();
 
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Establishes a connection to the Kafka producer.
+ * Logs a success message upon successful connection.
+ * Logs an error message if the connection attempt fails.
+ */
+
+/*******  4679df71-f81e-4420-9613-987dee178213  *******/
 const connectProducer = async () => {
   try {
     await producer.connect();
