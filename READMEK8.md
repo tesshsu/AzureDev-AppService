@@ -9,14 +9,18 @@ It supports both traditional web app deployment (App Service) and containerized 
  AzureDev-AppService/
  ├── public/index.html            # Static files (e.g., index.html)
  ├── src/                # Source code for Node.js/Express API (to be added later)
+ ├── ansible/            # GitOpt ArgoCD
+ │   ├──install_prometheus_grafana.yaml
+ │   └──prometheus-values.yaml
  ├── argocd/            # GitOpt ArgoCD
  │   └── app-of-apps.yaml
- ├── helm/                 # Helm charts directory
- │   ├── Chart.yaml
- │   ├── values.yaml
- │   └── templates/  
- │   │   └── deployment.yaml 
- │   │   └── service.yaml   # Kubernetes manifests
+ ├── helm/ 
+ │   └── myapp/                # Helm charts directory
+ │   │   ├── Chart.yaml
+ │   │   ├── values.yaml
+ │   │   └── templates/  
+ │   │   │   └── deployment.yaml 
+ │   │   │   └── service.yaml   # Kubernetes manifests
  ├── .github/            # GitHub Actions workflows
  │   └── workflows/
  ├── README.md

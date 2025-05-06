@@ -1,0 +1,30 @@
+controller:
+  replicaCount: 2
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "150m"
+    limits:
+      memory: "256Mi"
+      cpu: "300m"
+  service:
+    type: LoadBalancer
+    port: 9092
+zookeeper:
+  enabled: false
+persistence:
+  enabled: true
+  storageClass: "default"
+  size: 1Gi
+metrics:
+  kafka:
+    enabled: true
+  jmx:
+    enabled: true
+    resources:
+      requests:
+        memory: "32Mi"
+        cpu: "25m"
+      limits:
+        memory: "64Mi"
+        cpu: "50m"
