@@ -1,3 +1,4 @@
+architecture: deployment
 controller:
   replicaCount: 2
   resources:
@@ -10,17 +11,34 @@ controller:
   service:
     type: LoadBalancer
     port: 9092
+    externalTrafficPolicy: Local
 zookeeper:
-  enabled: false
+  enabled: true
+  replicaCount: 1
+  persistence:
+    enabled: true
+    storageClass: "default"
+    size: 1Gi
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
 persistence:
   enabled: true
   storageClass: "default"
   size: 1Gi
+service:
+  type: LoadBalancer
+  port: 9092
+  externalTrafficPolicy: Local
 metrics:
   kafka:
-    enabled: true
+    enabled: false
   jmx:
-    enabled: true
+    enabled: false
     resources:
       requests:
         memory: "32Mi"
@@ -28,3 +46,5 @@ metrics:
       limits:
         memory: "64Mi"
         cpu: "50m"
+kraft:
+  enabled: false
